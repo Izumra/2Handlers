@@ -1,0 +1,17 @@
+services:
+  server:
+    build: .
+    container_name: markzagumennikov
+    ports: 
+     - 3000:3000
+    restart: always
+    volumes:
+      - ./:/twohandlers
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - 2001:5432

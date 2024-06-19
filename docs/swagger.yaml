@@ -1,0 +1,204 @@
+basePath: /
+definitions:
+  entity.News:
+    properties:
+      categories:
+        items:
+          type: integer
+        type: array
+      content:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  requests.LoginBody:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  requests.NewsData:
+    properties:
+      categories:
+        items:
+          type: integer
+        type: array
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  responses.ListResBody:
+    properties:
+      news:
+        items:
+          $ref: '#/definitions/entity.News'
+        type: array
+      success:
+        type: boolean
+    type: object
+  responses.Pattern:
+    properties:
+      data:
+        x-nullable: true
+      error:
+        x-nullable: true
+    type: object
+info:
+  contact: {}
+  description: 2 обработчика.
+  title: 2 Обработчика
+  version: "1.0"
+paths:
+  /edit/{Id}/:
+    put:
+      consumes:
+      - application/json
+      description: Метод API, позволяющий авторизированному пользователю отредактировать
+        новость по id. Учтены пожелания и предусмотрено сохранение полей от перезаписи,  если
+        значение не было передано в запросе.
+      parameters:
+      - default: 0
+        description: Идентификатор новости
+        in: path
+        name: Id
+        required: true
+        type: integer
+      - description: Тело запроса формата 'application/json', содержащее информацию
+          для изменения записи
+        in: body
+        name: UpdateNews
+        required: true
+        schema:
+          $ref: '#/definitions/requests.NewsData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Структура успешного ответа на запрос изменения записи
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  $ref: '#/definitions/responses.ListResBody'
+                error:
+                  type: object
+              type: object
+        "500":
+          description: Структура неудачного ответа на запрос изменения записи
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      security:
+      - Authorization: []
+      summary: Редактировать новость
+      tags:
+      - News
+  /list/{offset}/{count}:
+    get:
+      consumes:
+      - application/json
+      description: Метод API, позволяющий авторизированному пользователю получить
+        список новостей в заданном диапазоне параметроми 'offset' и 'count'
+      parameters:
+      - default: 0
+        description: Шаг смещения
+        in: path
+        name: offset
+        required: true
+        type: integer
+      - default: 0
+        description: Количество
+        in: path
+        name: count
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Структура успешного ответа на запрос получения списка новостей
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  $ref: '#/definitions/responses.ListResBody'
+                error:
+                  type: object
+              type: object
+        "500":
+          description: Структура неудачного ответа на запрос получения списка новостей
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      security:
+      - Authorization: []
+      summary: Список новостей
+      tags:
+      - News
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Метод API, позволяющий пользователю произвести авторизацию в системе.
+        После успешного прохождения авторизации, в ответе выдастся JWT токен доступа,
+        требуемый для остальных обработчиков в качестве заголовка 'Authorization'
+      parameters:
+      - description: Тело запроса формата 'application/json', содержащее информацию
+          для авторизации
+        in: body
+        name: AuthBody
+        required: true
+        schema:
+          $ref: '#/definitions/requests.LoginBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Структура успешного ответа на запрос авторизации
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  type: string
+                error:
+                  type: object
+              type: object
+        "500":
+          description: Структура неудачного ответа на запрос авторизации
+          schema:
+            allOf:
+            - $ref: '#/definitions/responses.Pattern'
+            - properties:
+                data:
+                  type: object
+                error:
+                  type: string
+              type: object
+      summary: Авторизация
+      tags:
+      - Auth
+securityDefinitions:
+  Authorization:
+    in: header
+    name: authorization
+    type: apiKey
+swagger: "2.0"
